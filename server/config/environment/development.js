@@ -5,7 +5,7 @@
 module.exports = {
   // MongoDB connection options
   mongo: {
-    uri: 'mongodb://localhost/consumerapp-dev'
+    uri: 'mongodb://user:password@ds047901.mongolab.com:47901/foodapp'
   },
 
   seedDB: true
