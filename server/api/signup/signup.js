@@ -155,10 +155,9 @@ exports.signup = function(request, response){
 	var email = request.body.email;
 	var phone = request.body.phone;
 	var address =  request.body.address;
-<<<<<<< HEAD
+
 	console.log(username);
-=======
->>>>>>> origin/master
+
 
 	var synchronousCallback = function(isValid){
 		if(isValid){
