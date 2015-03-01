@@ -133,7 +133,7 @@ exports.signup = function(request, response){
 	var email = request.body.email;
 	var phone = request.body.phone;
 	var address =  request.body.address;
-	console.log(request);
+	console.log(username);
 
 	var synchronousCallback = function(isValid){
 		if(isValid){

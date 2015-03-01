@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('consumerAppApp')
-  .controller('SignupCtrl', function ($scope, Auth, $location, $window) {
+  .controller('SignupCtrl', function ($scope, $http, $location, $window) {
     $scope.user = {};
     $scope.errors = {};
 
@@ -9,12 +9,28 @@ angular.module('consumerAppApp')
       $scope.submitted = true;
 
       if(form.$valid) {
-        Auth.createUser({
-          name: $scope.user.name,
-          email: $scope.user.email,
-          password: $scope.user.password
-        })
-        .then( function() {
+
+          var request = $http({
+                method: 'POST',
+                url: 'http://localhost:9000/api/signup',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                transformRequest: function(obj) {
+                var str = [];
+                  for(var p in obj)
+                  str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                  return str.join("&");
+              },
+              data: {
+                        username: $scope.user.name,
+                        password: $scope.user.password,
+                        email: $scope.user.email,
+                        phone: $scope.user.number
+                    }
+      }).success(function () {
+
+
+    })
+    .then( function() {
           // Account created, redirect to home
           $location.path('/');
         })
@@ -23,10 +39,10 @@ angular.module('consumerAppApp')
           $scope.errors = {};
 
           // Update validity of form fields that match the mongoose errors
-          angular.forEach(err.errors, function(error, field) {
+          /*angular.forEach(err.errors, function(error, field) {
             form[field].$setValidity('mongoose', false);
             $scope.errors[field] = error.message;
-          });
+          });*/
         });
       }
     };
