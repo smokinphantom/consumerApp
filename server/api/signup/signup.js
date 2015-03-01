@@ -3,9 +3,9 @@
  */
 
  /**
- * Import schema for the nosql table
+ * Import schema for the nosql table(account_details)
  */
-var schema = require('./schema');
+var schema = require('../schema/account_details');
 
  /**
  * Import HTTP response codes to construct response messages for the client
