@@ -109,12 +109,13 @@ var isPhoneValid = function(phone){
  * Create a record based on the schema that can be written to the nosql DB
  */
 
-var createSchema = function(username,password, email, phone){
+var createSchema = function(username,password, email, phone, salt){
 	var record = new schema({
 				username : username,
 				password : password,
 				email: email,
-				phone : phone
+				phone : phone,
+				salt: salt
 	});
 	return record;
 };
@@ -133,8 +134,8 @@ var writeResponse = function(response, message){
  * Save the user details obtained from form to the nosql DB
  */
 
-var saveRecord = function(response, username, password, email, phone){
-	var record = createSchema(username,password, email, phone);
+var saveRecord = function(response, username, password, email, phone, salt){
+	var record = createSchema(username,password, email, phone, salt);
 	record.save(function(err){
 		if(err){
 			writeResponse(response,_errUnknown);
@@ -154,9 +155,10 @@ exports.signup = function(request, response){
 	var password =  request.body.password;
 	var email = request.body.email;
 	var phone = request.body.phone;
+	var salt = request.body.salt;
 	var address =  request.body.address;
 
-	console.log(username);
+	console.log(salt);
 
 
 	var synchronousCallback = function(isValid){
@@ -164,7 +166,7 @@ exports.signup = function(request, response){
 			if(isPasswordValid(password)){
 				if(isEmailValid(email)){
 					if(isPhoneValid(phone)){
-						saveRecord(response, username, password, email, phone);
+						saveRecord(response, username, password, email, phone, salt);
 					}
 					else{
 						writeResponse(response,_errPhone);

@@ -7,12 +7,13 @@ angular.module('consumerAppApp')
 
     $scope.register = function(form) {
       $scope.submitted = true;
+      var salt = (Math.random() * 100000).toString();
 
       if(form.$valid) {
 
           var request = $http({
                 method: 'POST',
-                url: 'http://localhost:9000/api/signup',
+                url: '/api/signup',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 transformRequest: function(obj) {
                 var str = [];
@@ -22,9 +23,10 @@ angular.module('consumerAppApp')
               },
               data: {
                         username: $scope.user.name,
-                        password: $scope.user.password,
+                        password: passwordHash($scope.user.password, salt),
                         email: $scope.user.email,
-                        phone: $scope.user.number
+                        phone: $scope.user.number,
+                        salt: salt
                     }
       }).success(function () {
 
@@ -46,6 +48,12 @@ angular.module('consumerAppApp')
         });
       }
     };
+
+
+    function passwordHash(password, salt){
+      var hashedPassword = CryptoJS.SHA256(salt+password).toString();
+      return hashedPassword;
+    }
 
     $scope.loginOauth = function(provider) {
       $window.location.href = '/auth/' + provider;
