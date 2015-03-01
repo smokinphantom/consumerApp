@@ -1,7 +1,6 @@
 'use strict';
 
 var express = require('express');
-var schema_account_details = require('./schema_account_details');
 var controller = require('./signup');
 
 var router = express.Router();
