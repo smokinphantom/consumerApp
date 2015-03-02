@@ -3,7 +3,7 @@
  */
 
 var schema = require('../schema/account_details');
-
+var cryptoJS = require('crypto-js');
 /**
  * Import HTTP response codes to construct response messages for the client
  */
@@ -55,9 +55,10 @@ var isValidCredentials = function(username,password, callback){
     		*			password: 'SomePassword89', --> password === data[0].password checks here
     		*			email: 'dsdsds@gmail.coms',
     		*			phone: 1234567891,
+    		*			salt: '13697.757851332426'
     		*		__v: 0 } ]
 			******/
-			callback(data.length !== 0 && password === data[0].password);
+			callback(data.length !== 0 && cryptoJS.SHA256(data[0].salt+password).toString() === data[0].password);
 		}
 	});	
 };

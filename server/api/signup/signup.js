@@ -158,8 +158,6 @@ exports.signup = function(request, response){
 	var salt = request.body.salt;
 	var address =  request.body.address;
 
-	console.log(salt);
-
 
 	var synchronousCallback = function(isValid){
 		if(isValid){
