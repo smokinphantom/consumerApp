@@ -41,8 +41,9 @@ var _msgCustom = template(null,null);
  * Check if given username exists in the DB, if yes check if the passed in password is correct
  */
 
-var isValidCredentials = function(username,password, callback){
-	schema.find({ username: username })
+var isValidCredentials = function(user,password, callback){
+	var searchCriteria = user.indexOf('@') > -1 ?   {email:user}: {username:user};
+	schema.find(searchCriteria)
 	.exec(function(err,data){
 		if(err){
 			console.log(err);
