@@ -21,4 +21,12 @@ The server code is structured as follows.
 		
 		./api/http_constants
 	
-	
+
+To deploy the app in the heroku
+	1. yo angular-fullstack:heroku
+	2. cd dist
+	3. heroku open
+	4. Make changes
+		4.1 grunt build --force
+		4.2 grunt buildcontrol:heroku
+	For more information http://tylerhenkel.com/creating-apps-with-angular-and-node-using-yeoman/ 
