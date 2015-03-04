@@ -1,29 +1,56 @@
 'use strict';
 
 angular.module('consumerAppApp')
-  .controller('LoginCtrl', function ($scope, Auth, $location, $window) {
-    $scope.user = {};
-    $scope.errors = {};
+.controller('LoginCtrl', function ($scope, $http, $location, $window) {
+  $scope.user = {};
+  $scope.errors = {};
 
-    $scope.login = function(form) {
-      $scope.submitted = true;
+  $scope.login = function(form) {
+    $scope.submitted = true;
 
-      if(form.$valid) {
-        Auth.login({
-          email: $scope.user.email,
-          password: $scope.user.password
-        })
-        .then( function() {
-          // Logged in, redirect to home
+    if(form.$valid) {
+
+          var request = $http({
+                method: 'POST',
+                url: '/api/login',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                transformRequest: function(obj) {
+                var str = [];
+                  for(var p in obj)
+                  str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                  return str.join("&");
+              },
+              data: {
+                        username: $scope.user.name,
+                        password: $scope.user.password
+                    }
+      }).success(function (response) {
+       
+        //TODO
+        //insert a jquery plugin to display that user was able to signup successfully
+
+    }).error(function(response){
+
+      $scope.user.error = response.toString();
+      
+    }).then( function() {
+          // Account created, redirect to home
           $location.path('/');
         })
         .catch( function(err) {
-          $scope.errors.other = err.message;
+          err = err.data;
+          $scope.errors = {};
+
+          // Update validity of form fields that match the mongoose errors
+          /*angular.forEach(err.errors, function(error, field) {
+            form[field].$setValidity('mongoose', false);
+            $scope.errors[field] = error.message;
+          });*/
         });
       }
-    };
+};
 
-    $scope.loginOauth = function(provider) {
-      $window.location.href = '/auth/' + provider;
-    };
-  });
+$scope.loginOauth = function(provider) {
+  $window.location.href = '/auth/' + provider;
+};
+});

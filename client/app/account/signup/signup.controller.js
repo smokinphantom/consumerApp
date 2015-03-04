@@ -28,8 +28,9 @@ angular.module('consumerAppApp')
                         phone: $scope.user.number,
                         salt: salt
                     }
-      }).success(function () {
-
+      }).success(function (response) {
+        //TODO
+        //insert a jquery plugin to display that user was able to signup successfully
 
     })
     .then( function() {
@@ -49,7 +50,12 @@ angular.module('consumerAppApp')
       }
     };
 
-
+    /**
+     * [hashed password gets generated]
+     * @param  {[type]} - String password
+     * @param  {[type]} - String random salt
+     * @return {[type]} - hashed+salt password
+     */
     function passwordHash(password, salt){
       var hashedPassword = CryptoJS.SHA256(salt+password).toString();
       return hashedPassword;
