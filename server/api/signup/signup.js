@@ -1,7 +1,3 @@
-/**
- * New node file
- */
-
  /**
  * Import schema for the nosql table(account_details)
  */
@@ -11,39 +7,16 @@ var schema = require('../schema/account_details');
  * Import HTTP response codes to construct response messages for the client
  */
 
-var _statusCodes = require('../http_constants/http_response_codes');
-	_statusCodes = new _statusCodes();
+var statusCodes = require('../http_constants/http_response_codes');
+	statusCodes = new statusCodes();
 
  /**
  * Import constants - response strings are stored in constants.js
  */
 
-var _constants = require('./constants');
-	_constants = new _constants();
+var constants = require('./constants');
+	constants = new constants();
 
- /**
- * Template for success and failure response
- */
-
-var template = function(status, message){
-	var temp = {}
-	temp.status = status;
-	temp.msg = message;
-	return temp;
-}
- 
- /**
- * Based on above template, construct the status message to be written in the HTTP response
- */
-
-var _errPhone = template(_statusCodes.badRequest,_constants._alert_invalid_phone);
-var _errPassword = template(_statusCodes.badRequest,_constants._alert_invalid_password);
-var _errEmail = template(_statusCodes.badRequest,_constants._alert_invalid_email);
-var _errUsernameUnavailable = template(_statusCodes.badRequest,_constants._alert_username_taken);
-var _errUsernameInvalid = template(_statusCodes.badRequest,_constants._alert_invalid_username);
-var _errUnknown = template(_statusCodes.unknown,_constants._alert_unknown);
-var _msgSuccess = template(_statusCodes.success,_constants._alert_msgSuccess);
-var _msgCustom = template(null,null);
 
  /**
  * Check if the username is already picked by someoneelse. Query the nosql DB to find this
@@ -94,6 +67,21 @@ var isEmailValid = function(email){
 };
 
 /**
+ * Check if the given email is already registered
+ */
+var isEmailTaken = function(email, callback){
+	schema.find({ email: email})
+	.exec(function(err,data){
+		if(err){
+			console.log(err);
+		}
+		else{	
+			callback(data.length !== 0);
+		}
+	});	
+}
+
+/**
  * Check if the given phone number is valid
  * Length = 10, all numbers
  */
@@ -125,25 +113,27 @@ var createSchema = function(username,password, email, phone, salt){
  * Message is of type Template
  */
 
-var writeResponse = function(response, message){
-	response.status(message.status);
-	response.json(message.msg);
+var writeResponse = function(msg, response){
+//	response.status(message.status);
+	response.json(msg);
 };
 
+/**
+ * Writes the message to the HTTP response.
+ * Message is of type Template
+ */
+
+var addResponse = function(fieldName, response, message){
+	response.msg[fieldName] = message;
+	return response;
+};
 /**
  * Save the user details obtained from form to the nosql DB
  */
 
-var saveRecord = function(response, username, password, email, phone, salt){
+var saveRecord = function(callback, username, password, email, phone, salt){
 	var record = createSchema(username,password, email, phone, salt);
-	record.save(function(err){
-		if(err){
-			writeResponse(response,_errUnknown);
-		}
-		else{
-			writeResponse(response,_msgSuccess);
-		}
-	});
+	record.save(callback);
 };
 
 /**
@@ -158,35 +148,67 @@ exports.signup = function(request, response){
 	var salt = request.body.salt;
 	var address =  request.body.address;
 
-
-	var synchronousCallback = function(isValid){
-		if(isValid){
-			if(isPasswordValid(password)){
-				if(isEmailValid(email)){
-					if(isPhoneValid(phone)){
-						saveRecord(response, username, password, email, phone, salt);
+	var res = {};
+	res.status = 200; 
+	res.msg = {}
+	
+	var userNameValid_callback = function(isValid){
+		if(!isValid){
+			res.status = statusCodes.badRequest;
+			res = addResponse("username", res, constants._alert_username_taken);
+			writeResponse(res, response);
+		}else {
+			if(!isPasswordValid(password)){
+				res.status = statusCodes.badRequest;
+				res = addResponse("password", res, constants._alert_invalid_password );
+			}
+			if(!isPhoneValid(phone)){
+				res.status = statusCodes.badRequest;
+				res = addResponse("phone", res, constants._alert_invalid_phone);
+			}
+			if(!isEmailValid(email)){
+				res.status = statusCodes.badRequest;
+				res = addResponse("email",res, constants._alert_invalid_email );
+			}
+			
+			var emailTaken_callback = function(isEmailTaken){
+				if(!isEmailTaken){
+					if(res.status == 200){
+						var saveRecord_callback = function(err){
+							if(err){
+								res.status = statusCodes.unknown;
+								res = addResponse("signup", res,constants._alert_unknown);
+							}
+							else{
+								res.status = statusCodes.success;
+								res = addResponse("signup", res, constants._alert_msgSuccess);
+							}
+							writeResponse(res, response);
+						};
+					
+						saveRecord(saveRecord_callback, username, password, email, phone, salt);
 					}
 					else{
-						writeResponse(response,_errPhone);
+						writeResponse(res, response);
 					}
 				}
 				else{
-					writeResponse(response, _errEmail );
+					res.status = statusCodes.badRequest;
+					res = addResponse("email",res, constants._alert_email_taken);
+					writeResponse(res, response);
 				}
 			}
-			else{
-				writeResponse(response, _errPassword );
-			}
-		}else{
-			writeResponse(response, _errUsernameUnavailable);
-		}
-	};
-	
+					
+			isEmailTaken(email, emailTaken_callback);
+		}	
+	}
 	if(isUserNameValid(username)){
-		isUserNameAvailable(username, synchronousCallback);
+		isUserNameAvailable(username, userNameValid_callback);
 	}
 	else{
-		writeResponse(response, _errUsernameInvalid);
+		res.status = statusCodes.badRequest;
+		res = addResponse("username",res, constants._alert_invalid_username);
+		writeResponse(res, response);
 	}
 		
 	
@@ -199,7 +221,7 @@ exports.get = function(request, response){
 	schema.find()
 	.exec(function(err,data){
 		if(err){
-			writeResponse(response, _errUnknown );
+			writeResponse(response, constants._alert_unknown );
 		}
 		else{
 			_msgCustom.status=200;
