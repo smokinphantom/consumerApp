@@ -156,8 +156,8 @@ exports.signup = function(request, response){
 		if(!isValid){
 			res.status = statusCodes.badRequest;
 			res = addResponse("username", res, constants._alert_username_taken);
-			writeResponse(res, response);
-		}else {
+//			writeResponse(res, response);
+		}
 			if(!isPasswordValid(password)){
 				res.status = statusCodes.badRequest;
 				res = addResponse("password", res, constants._alert_invalid_password );
@@ -200,7 +200,7 @@ exports.signup = function(request, response){
 			}
 					
 			isEmailTaken(email, emailTaken_callback);
-		}	
+	
 	}
 	if(isUserNameValid(username)){
 		isUserNameAvailable(username, userNameValid_callback);
@@ -231,3 +231,25 @@ exports.get = function(request, response){
 	});
 };
 
+/**
+ * Finds if username is already taken 
+ */
+
+exports.isUsernameNotTaken = function(request, response){
+	var username = request.query.username;
+	var userNameValid_callback = function(isValid){
+		var res = {};
+		res.status = 200; 
+		res.msg = {};
+		if(!isValid){
+			res.status = statusCodes.badRequest;
+			res = addResponse("username", res, constants._alert_username_taken);
+		}
+		else{
+			res.status = statusCodes.success;
+			res = addResponse("username", res, constants._alert_msgSuccess);
+		}
+		writeResponse(res, response);
+	}
+	isUserNameAvailable(username, userNameValid_callback);
+}

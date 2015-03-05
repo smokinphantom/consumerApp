@@ -14,6 +14,7 @@ router.delete('/:id', controller.destroy);
 */
 
 router.post('/', controller.signup);
+router.get('/', controller.isUsernameNotTaken);
 
 
 module.exports = router;
