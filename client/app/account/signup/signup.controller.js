@@ -7,6 +7,8 @@ angular.module('consumerAppApp')
 
     $scope.register = function(form) {
       $scope.submitted = true;
+      $scope.errors = {};
+
       var salt = (Math.random() * 100000).toString();
 
       if(form.$valid) {
@@ -28,16 +30,28 @@ angular.module('consumerAppApp')
                         phone: $scope.user.number,
                         salt: salt
                     }
-      }).success(function (response) {
+      }).then(function (response) {
+        if(response.status==200&&response.data.status==400){
+          if(response.data.msg.username) {
+            $scope.errors.username = response.data.msg.username;
+          }
+            else {
+              $scope.errors.email = response.data.msg.email;
+            }
+        }else{
+          // Account created, redirect to home
+          $location.path('/');
+        }
+
         //TODO
         //insert a jquery plugin to display that user was able to signup successfully
 
-    })
-    .then( function() {
+    }).then( function() {
+          //currently this isnt used
           // Account created, redirect to home
-          $location.path('/');
-        })
-        .catch( function(err) {
+          //$location.path('/');
+    
+    }).catch( function(err) {
           err = err.data;
           $scope.errors = {};
 
