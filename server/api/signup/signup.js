@@ -142,6 +142,7 @@ var saveRecord = function(callback, username, password, email, phone, salt){
 exports.signup = function(request, response){
 	
 	var username =  request.body.username;
+	username = username.toLowerCase();
 	var password =  request.body.password;
 	var email = request.body.email;
 	var phone = request.body.phone;
@@ -237,6 +238,7 @@ exports.get = function(request, response){
 
 exports.isUsernameNotTaken = function(request, response){
 	var username = request.query.username;
+	username = username.toLowerCase();
 	var userNameValid_callback = function(isValid){
 		var res = {};
 		res.status = 200; 

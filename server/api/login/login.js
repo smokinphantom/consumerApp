@@ -78,7 +78,22 @@ var writeResponse = function(response, message){
  * Public API that is exposed to the front end
  */
 exports.login = function(request, response){
-	var username =  request.body.username;
+	var username =  (request.body.username).toLowerCase();
+	var password =  request.body.password;
+
+	var synchronousCallback = function(boolean){
+		if(boolean){
+			writeResponse(response,_msgSuccess);
+		}
+		else{
+			writeResponse(response, _errUsernameInvalid);
+		}
+	}
+	isValidCredentials(username, password, synchronousCallback);
+};
+
+exports.logout = function(request, response){
+	var username =  (request.body.username).toLowerCase();
 	var password =  request.body.password;
 
 	var synchronousCallback = function(boolean){
