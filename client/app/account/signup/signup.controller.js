@@ -31,13 +31,14 @@ angular.module('consumerAppApp')
                         salt: salt
                     }
       }).then(function (response) {
+        // if a 400 response is sent from the server it will check for the errors in the username and email.
         if(response.status==200&&response.data.status==400){
-          if(response.data.msg.username) {
-            $scope.errors.username = response.data.msg.username;
+          for(var key in response.data.msg){
+            if(key === "username")
+              $scope.errors.username = response.data.msg[key];
+            if(key === "email")
+              $scope.errors.email = response.data.msg[key];
           }
-            else {
-              $scope.errors.email = response.data.msg.email;
-            }
         }else{
           // Account created, redirect to home
           $location.path('/');
