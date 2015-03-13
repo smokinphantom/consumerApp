@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('consumerAppApp')
-.controller('LoginCtrl', function ($scope, $http, $location, $window) {
+.controller('LoginCtrl', function ($scope, Auth, $cookieStore, $http, $location, $window) {
   $scope.user = {};
   $scope.errors = {};
 
@@ -25,13 +25,16 @@ angular.module('consumerAppApp')
                         password: $scope.user.password
                     }
       }).success(function (response) {
-       
+       $cookieStore.put('token', response.id);
+        Auth.setCurrentUser(response.user);
+        console.log(Auth.getCurrentUser);
+       console.log(response.user);
         //TODO
         //insert a jquery plugin to display that user was able to signup successfully
 
     }).error(function(response){
-
-      $scope.user.error = response.toString();
+      console.log(response);
+      $scope.user.error = response;
       
     }).then( function() {
           // Account created, redirect to home

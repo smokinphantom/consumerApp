@@ -1,7 +1,7 @@
  /**
  * Import schema for the nosql table(account_details)
  */
-
+var auth = require('../../auth/auth.service');
 var schema = require('../schema/account_details');
 var cryptoJS = require('crypto-js');
 /**
@@ -69,12 +69,14 @@ var isValidCredentials = function(user,password, callback){
  * Message is of type Template
  */
 
-var writeResponse = function(response, message, request, username){
+var writeResponse = function(response, message, token, request, username){
 	if(request && username){
 		request.session.username = username;
 	}
 	response.status(message.status);
-	response.json(message.msg);
+	//response.json(message.msg);
+	console.log(token);
+	response.json(token);
 };
 
 /**
@@ -83,10 +85,15 @@ var writeResponse = function(response, message, request, username){
 exports.login = function(request, response){
 	var username =  (request.body.username).toLowerCase();
 	var password =  request.body.password;
+	var token = {};
 	if(!request.session.username){
 		var synchronousCallback = function(boolean){
 			if(boolean){
-				writeResponse(response,_msgSuccess, request, username);
+				token.id = auth.signToken(username);
+				token.user = username;
+				//console.log(token.id);
+				//console.log(token.user);
+				writeResponse(response,_msgSuccess, token, request, username);
 			}
 			else{
 				writeResponse(response, _errUsernameInvalid);

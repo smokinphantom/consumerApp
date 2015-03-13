@@ -101,13 +101,20 @@ angular.module('consumerAppApp')
         return currentUser;
       },
 
+      setCurrentUser: function(user) {
+        currentUser = user;
+      },
+
       /**
        * Check if a user is logged in
        *
        * @return {Boolean}
        */
       isLoggedIn: function() {
-        return currentUser.hasOwnProperty('role');
+        if($cookieStore.get('token'))
+          return true;//.hasOwnProperty('role');
+        else 
+          return false;
       },
 
       /**
