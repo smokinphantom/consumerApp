@@ -69,7 +69,10 @@ var isValidCredentials = function(user,password, callback){
  * Message is of type Template
  */
 
-var writeResponse = function(response, message){
+var writeResponse = function(response, message, request, username){
+	if(request && username){
+		request.session.username = username;
+	}
 	response.status(message.status);
 	response.json(message.msg);
 };
@@ -80,16 +83,20 @@ var writeResponse = function(response, message){
 exports.login = function(request, response){
 	var username =  (request.body.username).toLowerCase();
 	var password =  request.body.password;
-
-	var synchronousCallback = function(boolean){
-		if(boolean){
-			writeResponse(response,_msgSuccess);
+	if(!request.session.username){
+		var synchronousCallback = function(boolean){
+			if(boolean){
+				writeResponse(response,_msgSuccess, request, username);
+			}
+			else{
+				writeResponse(response, _errUsernameInvalid);
+			}
 		}
-		else{
-			writeResponse(response, _errUsernameInvalid);
-		}
+		isValidCredentials(username, password, synchronousCallback);
 	}
-	isValidCredentials(username, password, synchronousCallback);
+	else{
+		response.json("Already logged in");
+	}
 };
 
 exports.logout = function(request, response){
