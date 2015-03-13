@@ -74,9 +74,12 @@ var writeResponse = function(response, message, token, request, username){
 		request.session.username = username;
 	}
 	response.status(message.status);
-	//response.json(message.msg);
-	console.log(token);
-	response.json(token);
+	if(token){
+		response.json(token);
+	}
+	else{
+		response.json(message.msg);
+	}
 };
 
 /**
@@ -86,13 +89,14 @@ exports.login = function(request, response){
 	var username =  (request.body.username).toLowerCase();
 	var password =  request.body.password;
 	var token = {};
-	if(!request.session.username){
+	if(request.session.username &&  request.session.username === username){
+		response.json("Already logged in");
+	}
+	else{
 		var synchronousCallback = function(boolean){
 			if(boolean){
 				token.id = auth.signToken(username);
 				token.user = username;
-				//console.log(token.id);
-				//console.log(token.user);
 				writeResponse(response,_msgSuccess, token, request, username);
 			}
 			else{
@@ -100,9 +104,6 @@ exports.login = function(request, response){
 			}
 		}
 		isValidCredentials(username, password, synchronousCallback);
-	}
-	else{
-		response.json("Already logged in");
 	}
 };
 
