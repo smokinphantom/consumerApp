@@ -107,17 +107,13 @@ exports.login = function(request, response){
 	}
 };
 
-exports.logout = function(request, response){
-	var username =  (request.body.username).toLowerCase();
-	var password =  request.body.password;
-
-	var synchronousCallback = function(boolean){
-		if(boolean){
-			writeResponse(response,_msgSuccess);
-		}
-		else{
-			writeResponse(response, _errUsernameInvalid);
-		}
+exports.getUserName = function(request, response){
+	if(request.session.username){
+		response.status(200);
+		response.json(request.session.username);
 	}
-	isValidCredentials(username, password, synchronousCallback);
+	else{
+		response.status(400);
+		response.json("Please login first");
+	}
 };
