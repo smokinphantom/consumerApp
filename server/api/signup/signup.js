@@ -114,8 +114,8 @@ var createSchema = function(username,password, email, phone, salt){
  */
 
 var writeResponse = function(msg, response){
-//	response.status(message.status);
-	response.json(msg);
+	response.status(msg.status);
+	response.send(msg.msg);
 };
 
 /**
@@ -140,70 +140,75 @@ var saveRecord = function(callback, username, password, email, phone, salt){
  * Public API that is exposed to the front end
  */
 exports.signup = function(request, response){
+	var res = {};
+	res.status = 200; 
+	res.msg = {}
+	if(Object.keys(request.body).length!=5){
+		res = addResponse("RequiredParameters",res, "Please enter username,password,email and phone");
+		writeResponse(res, response);
+	}
 	
 	var username =  request.body.username;
-	username = username.toLowerCase();
+	if(username)
+		username = username.toLowerCase();
 	var password =  request.body.password;
 	var email = request.body.email;
 	var phone = request.body.phone;
 	var salt = request.body.salt;
 	var address =  request.body.address;
 
-	var res = {};
-	res.status = 200; 
-	res.msg = {}
+
 	
 	var userNameValid_callback = function(isValid){
 		if(!isValid){
 			res.status = statusCodes.badRequest;
 			res = addResponse("username", res, constants._alert_username_taken);
-//			writeResponse(res, response);
 		}
-			if(!isPasswordValid(password)){
-				res.status = statusCodes.badRequest;
-				res = addResponse("password", res, constants._alert_invalid_password );
-			}
-			if(!isPhoneValid(phone)){
-				res.status = statusCodes.badRequest;
-				res = addResponse("phone", res, constants._alert_invalid_phone);
-			}
-			if(!isEmailValid(email)){
-				res.status = statusCodes.badRequest;
-				res = addResponse("email",res, constants._alert_invalid_email );
-			}
+		if(!password || !isPasswordValid(password)){
+			res.status = statusCodes.badRequest;
+			res = addResponse("password", res, constants._alert_invalid_password );
+		}
+		if(!phone || !isPhoneValid(phone)){
+			res.status = statusCodes.badRequest;
+			res = addResponse("phone", res, constants._alert_invalid_phone);
+		}
+		if(!email || !isEmailValid(email)){
+			res.status = statusCodes.badRequest;
+			res = addResponse("email",res, constants._alert_invalid_email );
+		}
 			
-			var emailTaken_callback = function(isEmailTaken){
-				if(!isEmailTaken){
-					if(res.status == 200){
-						var saveRecord_callback = function(err){
-							if(err){
-								res.status = statusCodes.unknown;
-								res = addResponse("signup", res,constants._alert_unknown);
-							}
-							else{
-								res.status = statusCodes.success;
-								res = addResponse("signup", res, constants._alert_msgSuccess);
-							}
-							writeResponse(res, response);
-						};
-					
-						saveRecord(saveRecord_callback, username, password, email, phone, salt);
-					}
-					else{
+		var emailTaken_callback = function(isEmailTaken){
+			if(!isEmailTaken){
+				if(res.status == 200){
+					var saveRecord_callback = function(err){
+						if(err){
+							res.status = statusCodes.unknown;
+							res = addResponse("signup", res,constants._alert_unknown);
+						}
+						else{
+							res.status = statusCodes.success;
+							res = addResponse("signup", res, constants._alert_msgSuccess);
+						}
 						writeResponse(res, response);
-					}
+					};
+				
+					saveRecord(saveRecord_callback, username, password, email, phone, salt);
 				}
 				else{
-					res.status = statusCodes.badRequest;
-					res = addResponse("email",res, constants._alert_email_taken);
 					writeResponse(res, response);
 				}
 			}
+			else{
+				res.status = statusCodes.badRequest;
+				res = addResponse("email",res, constants._alert_email_taken);
+				writeResponse(res, response);
+			}
+		}
 					
-			isEmailTaken(email, emailTaken_callback);
+		isEmailTaken(email, emailTaken_callback);
 	
 	}
-	if(isUserNameValid(username)){
+	if(username && isUserNameValid(username)){
 		isUserNameAvailable(username, userNameValid_callback);
 	}
 	else{
