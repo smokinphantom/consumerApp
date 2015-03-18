@@ -4,7 +4,9 @@ angular.module('consumerAppApp')
   .factory('Auth', function Auth($location, $rootScope, $http, User, $cookieStore, $q) {
     var currentUser = {};
     if($cookieStore.get('token')) {
-      //currentUser = User.get();
+      User.getUser().success(function (custs) {
+                currentUser = custs;
+            });
     }
 
     return {
@@ -47,6 +49,9 @@ angular.module('consumerAppApp')
       logout: function() {
         $cookieStore.remove('token');
         currentUser = {};
+        User.logout().success(function (response) {
+                console.log(response);
+            });
       },
 
       /**

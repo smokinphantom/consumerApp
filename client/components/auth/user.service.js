@@ -1,22 +1,18 @@
-'use strict';
 
-angular.module('consumerAppApp')
-  .factory('User', function ($resource) {
-    return $resource('/api/users/:id/:controller', {
-      id: '@_id'
-    },
-    {
-      changePassword: {
-        method: 'PUT',
-        params: {
-          controller:'password'
-        }
-      },
-      get: {
-        method: 'GET',
-        params: {
-          id:'me'
-        }
-      }
-	  });
-  });
+
+  angular.module('consumerAppApp')
+    .factory('User', ['$http', function($http) {
+
+    var urlBase = '/api';
+    var dataFactory = {};
+
+    dataFactory.getUser = function () {
+        return $http.get(urlBase+'/'+'login');
+    };
+
+    dataFactory.logout = function () {
+        return $http.get(urlBase+'/'+'logout');
+    };
+
+    return dataFactory;
+}]);
