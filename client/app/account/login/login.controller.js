@@ -25,10 +25,12 @@ angular.module('consumerAppApp')
                         password: $scope.user.password
                     }
       }).success(function (response) {
-       $cookieStore.put('token', response.id);
-        Auth.setCurrentUser(response.user);
+        if(response.id){
+          $cookieStore.put('token', response.id);
+          Auth.setCurrentUser(response.user);
+      }
         console.log(Auth.getCurrentUser);
-       console.log(response.user);
+        console.log(response.user);
         //TODO
         //insert a jquery plugin to display that user was able to signup successfully
 

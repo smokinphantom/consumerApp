@@ -48,7 +48,7 @@ var isValidCredentials = function(user,password, callback){
 		if(err){
 			console.log(err);
 		}
-		else{	
+		else{	console.log(data);
 			/******
 			*	Sample values for the returned data from the DB
 			*		[ { _id: 54f338a63d279adc1b7e95b7,
